@@ -1,9 +1,8 @@
 from src.camera import run_camera
-from src.detector import load_model
+from src.detector import run_detection
 
 def main():
-    load_model()
-    print("Model loaded successfully.")
+    run_detection()
 
 if __name__ == "__main__":
     main()
