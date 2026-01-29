@@ -1,20 +1,14 @@
 import cv2
 
-def run_camera():
-    cap = cv2.VideoCapture(0)
-
+def open_camera(index: int = 0):
+    cap = cv2.VideoCapture(index)
     if not cap.isOpened():
         raise RuntimeError("Could not open video device")
-    
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    return cap
 
-        cv2.imshow("Webcam", frame)
+def read_frame(cap):
+    return cap.read()
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    
+def release_camera(cap):
     cap.release()
     cv2.destroyAllWindows()
