@@ -5,14 +5,16 @@ from src.detector import load_model, detect
 def main():
     cap = open_camera(0)
     model = load_model()
+
     conf_threshold = 0.5
+    allowed_classes = ["person"]
 
     while True:
         ret, frame = read_frame(cap)
         if not ret:
             break
 
-        detections = detect(model, frame, conf_threshold)
+        detections = detect(model, frame, conf_threshold, allowed_classes)
         for x1, y1, x2, y2, label, conf in detections:
             text = f"{label} {conf:.2f}"
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
