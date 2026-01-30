@@ -1,8 +1,11 @@
 from ultralytics import YOLO
 from pathlib import Path
 
-def load_model(model_path: str = "models/yolov8n.pt"):
-    return YOLO(Path(model_path))
+def load_model(model_path: str = "models/yolov8n.pt", device: str = "cpu"):
+    model_path = Path(model_path)
+    model = YOLO(model_path)
+    model.to(device)
+    return model
 
 def detect(model, frame, conf_threshold: float = 0.5, allowed_classes: list = None):
     results = model(frame, verbose=False)[0]

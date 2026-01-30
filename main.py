@@ -1,11 +1,15 @@
 import cv2
 import time
+import torch
 from src.camera import open_camera, read_frame, release_camera
 from src.detector import load_model, detect
 
 def main():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Using device: {device}")
+    
     cap = open_camera(0)
-    model = load_model("models/yolov8n.pt")
+    model = load_model("models/yolov8n.pt", device)
 
     conf_threshold = 0.5
     allowed_classes = ["person"]
