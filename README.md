@@ -13,6 +13,7 @@ This project implements a real-time object detection system using a webcam. It u
 real-time-object-detector/
 │
 ├── src/
+│   ├── __init__.py
 │   ├── detector.py
 │   └── camera.py
 │
@@ -21,5 +22,8 @@ real-time-object-detector/
 │
 ├── requirements.txt
 ├── README.md
+├── main.py
+├── .python-version
+├── pyproject.toml
 └── .gitignore
 ```
