@@ -5,7 +5,7 @@ from src.detector import load_model, detect
 
 def main():
     cap = open_camera(0)
-    model = load_model()
+    model = load_model("models/yolov8n.pt")
 
     conf_threshold = 0.5
     allowed_classes = ["person"]
