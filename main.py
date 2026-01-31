@@ -1,18 +1,17 @@
 import cv2
 import time
 import torch
+
 from src.camera import open_camera, read_frame, release_camera
 from src.detector import load_model, detect
+from src.config import MODEL_PATH, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES, CAMERA_INDEX, WINDOW_NAME
 
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     
-    cap = open_camera(0)
-    model = load_model("models/yolov8n.pt", device)
-
-    conf_threshold = 0.5
-    allowed_classes = ["person"]
+    cap = open_camera(CAMERA_INDEX)
+    model = load_model(MODEL_PATH, device)
 
     prev_time = 0.0
 
@@ -22,7 +21,7 @@ def main():
             if not ret:
                 break
 
-            detections = detect(model, frame, conf_threshold, allowed_classes)
+            detections = detect(model, frame, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES)
             
             for x1, y1, x2, y2, label, conf in detections:
                 text = f"{label} {conf:.2f}"
