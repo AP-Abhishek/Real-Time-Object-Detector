@@ -14,8 +14,10 @@ real-time-object-detector/
 │
 ├── src/
 │   ├── __init__.py
+│   ├── camera.py
+│   ├── config.py
 │   ├── detector.py
-│   └── camera.py
+│   └── logger.py
 │
 ├── models/
 │   └── yolov8n.pt
