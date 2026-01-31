@@ -5,19 +5,25 @@ import torch
 from src.camera import open_camera, read_frame, release_camera
 from src.detector import load_model, detect
 from src.config import MODEL_PATH, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES, CAMERA_INDEX, WINDOW_NAME
+from src.logger import setup_logger
 
 def main():
+    logger = setup_logger()
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Using device: {device}")
+    logger.info(f"Using device: {device}")
     
     cap = open_camera(CAMERA_INDEX)
     model = load_model(MODEL_PATH, device)
+    logger.info("Model loaded successfully.")
 
     prev_time = 0.0
+    running = True
 
-    while True:
+    while running:
         ret, frame = read_frame(cap)
         if not ret:
+            logger.warning("Failed to read frame from camera.")
             break
 
         detections = detect(model, frame, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES)
@@ -33,11 +39,13 @@ def main():
 
         cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
-        cv2.imshow("Detections", frame)
+        cv2.imshow(WINDOW_NAME, frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key in (ord('q'), 27):
-            break
+            running = False
+    release_camera(cap)
+    logger.info("Application terminated gracefully.")
 
 if __name__ == "__main__":
     main()
