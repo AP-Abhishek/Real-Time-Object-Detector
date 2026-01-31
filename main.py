@@ -15,37 +15,29 @@ def main():
 
     prev_time = 0.0
 
-    try:
-        while True:
-            ret, frame = read_frame(cap)
-            if not ret:
-                break
+    while True:
+        ret, frame = read_frame(cap)
+        if not ret:
+            break
 
-            detections = detect(model, frame, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES)
-            
-            for x1, y1, x2, y2, label, conf in detections:
-                text = f"{label} {conf:.2f}"
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(frame, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        detections = detect(model, frame, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES)
+        
+        for x1, y1, x2, y2, label, conf in detections:
+            text = f"{label} {conf:.2f}"
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            current_time = time.time()
-            fps = 1 / (current_time - prev_time) if prev_time else 0
-            prev_time = current_time
+        current_time = time.time()
+        fps = 1 / (current_time - prev_time) if prev_time else 0
+        prev_time = current_time
 
-            cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-            
-            cv2.imshow("Detections", frame)
+        cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        
+        cv2.imshow("Detections", frame)
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q') or key == 27:
-                break
-    
-    except KeyboardInterrupt:
-        print("Interrupted by user.")
-    
-    finally:
-        release_camera(cap)
-        print("Exiting...")
+        key = cv2.waitKey(1) & 0xFF
+        if key in (ord('q'), 27):
+            break
 
 if __name__ == "__main__":
     main()
