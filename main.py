@@ -13,8 +13,19 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"Using device: {device}")
     
-    cap = open_camera(CAMERA_INDEX)
-    model = load_model(MODEL_PATH, device)
+    try:
+        cap = open_camera(CAMERA_INDEX)
+    except RuntimeError as e:
+        logger.error(str(e))
+        return
+    
+    try:
+        model = load_model(MODEL_PATH, device)
+    except Exception as e:
+        logger.error(f"Failed to load model: {e}")
+        release_camera(cap)
+        return
+    
     logger.info("Model loaded successfully.")
 
     prev_time = 0.0
@@ -44,7 +55,9 @@ def main():
         key = cv2.waitKey(1) & 0xFF
         if key in (ord('q'), 27):
             running = False
+
     release_camera(cap)
+    cv2.destroyAllWindows()
     logger.info("Application terminated gracefully.")
 
 if __name__ == "__main__":

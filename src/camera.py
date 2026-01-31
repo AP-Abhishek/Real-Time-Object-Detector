@@ -7,8 +7,10 @@ def open_camera(index: int = 0):
     return cap
 
 def read_frame(cap):
+    if cap is None or not cap.isOpened():
+        return False, None
     return cap.read()
 
 def release_camera(cap):
-    cap.release()
-    cv2.destroyAllWindows()
+    if cap is not None and cap.isOpened():
+        cap.release()
