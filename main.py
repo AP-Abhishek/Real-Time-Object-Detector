@@ -34,6 +34,12 @@ def parse_args():
         default=None,
         help="Comma-separated class names to detect (overrides config)",
     )
+    parser.add_argument(
+        "--max-fps",
+        type=float,
+        default=None,
+        help="Limit processing FPS (e.g. 15). Unlimited if omitted.",
+    )
     return parser.parse_args()
 
 def parse_classes(value):
@@ -46,10 +52,13 @@ def main():
     logger = setup_logger()
 
     allowed_classes = parse_classes(args.classes)
+    frame_interval = 1.0 / args.max_fps if args.max_fps and args.max_fps > 0 else None
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"Using device: {device}")
     logger.info(f"Confidence threshold: {args.conf}")
+    if frame_interval:
+        logger.info(f"FPS limited to: {args.max_fps}")
 
     if args.video:
         logger.info(f"Using video file: {args.video}")
@@ -71,19 +80,24 @@ def main():
         model = load_model(MODEL_PATH, device)
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
-        release_camera(cap)
         release_fn()
         return
     
     logger.info("Model loaded successfully.")
 
     prev_time = 0.0
+    last_frame_time = 0.0
     running = True
 
     while running:
+        now = time.time()
+        if frame_interval and (now - last_frame_time) < frame_interval:
+            time.sleep(frame_interval - (now - last_frame_time))
+        last_frame_time = time.time()
+
         ret, frame = cap.read() if args.video else read_frame(cap)
-        if not ret:
-            logger.warning("Failed to read frame from camera.")
+        if not ret or frame is None:
+            logger.warning("Input stream ended.")
             break
 
         detections = detect(model, frame, args.conf, allowed_classes)
