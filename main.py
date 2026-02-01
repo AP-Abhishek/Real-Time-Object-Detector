@@ -3,7 +3,6 @@ import cv2
 import time
 import torch
 
-from src import tracker
 from src.camera import open_camera, read_frame, release_camera
 from src.detector import load_model, detect
 from src.config import MODEL_PATH, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES, CAMERA_INDEX, WINDOW_NAME
@@ -131,7 +130,7 @@ def main():
         if key in (ord('q'), 27):
             running = False
 
-    release_camera(cap)
+    release_fn()
     cv2.destroyAllWindows()
     logger.info("Application terminated gracefully.")
 
