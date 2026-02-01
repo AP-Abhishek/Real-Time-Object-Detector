@@ -2,6 +2,19 @@
 
 This project implements a real-time object detection system using a webcam. It uses the YOLOv8 model to identify and label objects such as people and everyday items by drawing bounding boxes on live video frames.
 
+### Features
+
+- Real-time object detection using YOLOv8
+- Webcam input support
+- Video file input support
+- Bounding boxes and class labels rendered in real time
+- Confidence score displayed per detection
+- Real-time FPS display
+- Configurable confidence threshold via CLI
+- Dynamic class filtering via CLI
+- Optional FPS limiting
+- Clean and predictable application shutdown
+
 ### Tools Used
 - Python
 - OpenCV
