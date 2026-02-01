@@ -3,10 +3,12 @@ import cv2
 import time
 import torch
 
+from src import tracker
 from src.camera import open_camera, read_frame, release_camera
 from src.detector import load_model, detect
 from src.config import MODEL_PATH, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES, CAMERA_INDEX, WINDOW_NAME
 from src.logger import setup_logger
+from src.tracker import CentroidTracker
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Real-time Object Detection Application")
@@ -50,6 +52,7 @@ def parse_classes(value):
 def main():
     args = parse_args()
     logger = setup_logger()
+    tracker = CentroidTracker()
 
     allowed_classes = parse_classes(args.classes)
     frame_interval = 1.0 / args.max_fps if args.max_fps and args.max_fps > 0 else None
@@ -102,10 +105,13 @@ def main():
 
         detections = detect(model, frame, args.conf, allowed_classes)
         
-        for x1, y1, x2, y2, label, conf in detections:
-            text = f"{label} {conf:.2f}"
+        rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
+        objects = tracker.update(rects)
+
+        for ((x1, y1, x2, y2, label, conf), object_id) in zip(detections, objects.keys()):
+            text = f"ID {object_id}: {label} {conf:.2f}"
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(frame, text, (x1, max(y1 - 10, 0)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         current_time = time.time()
         fps = 1 / (current_time - prev_time) if prev_time else 0
