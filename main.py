@@ -28,11 +28,24 @@ def parse_args():
         default=CONFIDENCE_THRESHOLD,
         help="Confidence threshold (default from config)"
     )
+    parser.add_argument(
+        "--classes",
+        type=str,
+        default=None,
+        help="Comma-separated class names to detect (overrides config)",
+    )
     return parser.parse_args()
+
+def parse_classes(value):
+    if not value:
+        return ALLOWED_CLASSES
+    return [c.strip() for c in value.split(",") if c.strip()]
 
 def main():
     args = parse_args()
     logger = setup_logger()
+
+    allowed_classes = parse_classes(args.classes)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"Using device: {device}")
@@ -73,7 +86,7 @@ def main():
             logger.warning("Failed to read frame from camera.")
             break
 
-        detections = detect(model, frame, args.conf, ALLOWED_CLASSES)
+        detections = detect(model, frame, args.conf, allowed_classes)
         
         for x1, y1, x2, y2, label, conf in detections:
             text = f"{label} {conf:.2f}"
