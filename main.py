@@ -17,6 +17,12 @@ def parse_args():
         help="Webcam index (default from config)"
     )
     parser.add_argument(
+        "--video",
+        type=str,
+        default=None,
+        help="Path to video file (overrides webcam)",
+    )
+    parser.add_argument(
         "--conf",
         type=float,
         default=CONFIDENCE_THRESHOLD,
@@ -30,20 +36,30 @@ def main():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"Using device: {device}")
-    logger.info(f"Camera index: {args.camera}")
     logger.info(f"Confidence threshold: {args.conf}")
-    
-    try:
-        cap = open_camera(args.camera)
-    except RuntimeError as e:
-        logger.error(str(e))
-        return
+
+    if args.video:
+        logger.info(f"Using video file: {args.video}")
+        cap = cv2.VideoCapture(args.video)
+        if not cap.isOpened():
+            logger.error("Failed to open video file.")
+            return
+        release_fn = cap.release
+    else:
+        logger.info(f"Using webcam index: {args.camera}")
+        try:
+            cap = open_camera(args.camera)
+        except RuntimeError as e:
+            logger.error(str(e))
+            return
+        release_fn = lambda: release_camera(cap)
     
     try:
         model = load_model(MODEL_PATH, device)
     except Exception as e:
         logger.error(f"Failed to load model: {e}")
         release_camera(cap)
+        release_fn()
         return
     
     logger.info("Model loaded successfully.")
@@ -52,7 +68,7 @@ def main():
     running = True
 
     while running:
-        ret, frame = read_frame(cap)
+        ret, frame = cap.read() if args.video else read_frame(cap)
         if not ret:
             logger.warning("Failed to read frame from camera.")
             break
