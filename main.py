@@ -106,7 +106,13 @@ def main():
         detections = detect(model, frame, args.conf, allowed_classes)
         
         rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
-        objects = tracker.update(rects)
+        objects, events = tracker.update(rects)
+
+        for object_id in events["entered"]:
+            logger.info(f"Object {object_id} entered frame")
+
+        for object_id in events["exited"]:
+            logger.info(f"Object {object_id} exited frame")
 
         for ((x1, y1, x2, y2, label, conf), object_id) in zip(detections, objects.keys()):
             text = f"ID {object_id}: {label} {conf:.2f}"

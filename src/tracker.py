@@ -10,12 +10,17 @@ class CentroidTracker:
         self.disappeared = OrderedDict()
         self.max_disappeared = max_disappeared
 
+        self.entered = set()
+        self.exited = set()
+
     def register(self, centroid):
         self.objects[self.next_object_id] = centroid
         self.disappeared[self.next_object_id] = 0
+        self.entered.add(self.next_object_id)
         self.next_object_id += 1
 
     def deregister(self, object_id):
+        self.exited.add(object_id)
         del self.objects[object_id]
         del self.disappeared[object_id]
 
@@ -69,4 +74,13 @@ class CentroidTracker:
                 for col in unused_cols:
                     self.register(input_centroids[col])
 
-        return self.objects
+        events = {
+            "entered": list(self.entered),
+            "exited": list(self.exited),
+        }
+
+        self.entered.clear()
+        self.exited.clear()
+
+        return self.objects, events
+
