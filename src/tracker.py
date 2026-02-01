@@ -30,7 +30,16 @@ class CentroidTracker:
                 self.disappeared[object_id] += 1
                 if self.disappeared[object_id] > self.max_disappeared:
                     self.deregister(object_id)
-            return self.objects
+
+            events = {
+                "entered": list(self.entered),
+                "exited": list(self.exited),
+            }
+
+            self.entered.clear()
+            self.exited.clear()
+
+            return self.objects, events
 
         input_centroids = np.zeros((len(rects), 2), dtype="int")
         for (i, (x1, y1, x2, y2)) in enumerate(rects):
