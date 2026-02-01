@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import time
 import torch
@@ -7,14 +8,33 @@ from src.detector import load_model, detect
 from src.config import MODEL_PATH, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES, CAMERA_INDEX, WINDOW_NAME
 from src.logger import setup_logger
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Real-time Object Detection Application")
+    parser.add_argument(
+        "--camera",
+        type=int,
+        default=CAMERA_INDEX,
+        help="Webcam index (default from config)"
+    )
+    parser.add_argument(
+        "--conf",
+        type=float,
+        default=CONFIDENCE_THRESHOLD,
+        help="Confidence threshold (default from config)"
+    )
+    return parser.parse_args()
+
 def main():
+    args = parse_args()
     logger = setup_logger()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"Using device: {device}")
+    logger.info(f"Camera index: {args.camera}")
+    logger.info(f"Confidence threshold: {args.conf}")
     
     try:
-        cap = open_camera(CAMERA_INDEX)
+        cap = open_camera(args.camera)
     except RuntimeError as e:
         logger.error(str(e))
         return
@@ -37,7 +57,7 @@ def main():
             logger.warning("Failed to read frame from camera.")
             break
 
-        detections = detect(model, frame, CONFIDENCE_THRESHOLD, ALLOWED_CLASSES)
+        detections = detect(model, frame, args.conf, ALLOWED_CLASSES)
         
         for x1, y1, x2, y2, label, conf in detections:
             text = f"{label} {conf:.2f}"
