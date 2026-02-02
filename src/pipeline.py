@@ -59,7 +59,8 @@ def run_pipeline(
                     min_dist = d
                     object_id = oid
 
-            text = f"ID {object_id}: {label} {conf:.2f}" if object_id is not None else f"{label} {conf:.2f}"
+            lifetime_sec = int(time.time() - tracker.start_time[object_id])
+            text = f"ID {object_id} | {label} {conf:.2f} | {lifetime_sec}s"
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(

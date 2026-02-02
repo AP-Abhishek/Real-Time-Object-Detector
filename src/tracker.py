@@ -1,7 +1,7 @@
 import numpy as np
+import time
 from collections import OrderedDict
 from scipy.spatial import distance as dist
-
 
 class CentroidTracker:
     def __init__(self, max_disappeared=30):
@@ -10,19 +10,30 @@ class CentroidTracker:
         self.disappeared = OrderedDict()
         self.max_disappeared = max_disappeared
 
+        self.start_time = {}
+        self.total_frames = {}
+
         self.entered = set()
         self.exited = set()
 
     def register(self, centroid):
         self.objects[self.next_object_id] = centroid
         self.disappeared[self.next_object_id] = 0
+
+        self.start_time[self.next_object_id] = time.time()
+        self.total_frames[self.next_object_id] = 0
+
         self.entered.add(self.next_object_id)
         self.next_object_id += 1
 
     def deregister(self, object_id):
         self.exited.add(object_id)
+
         del self.objects[object_id]
         del self.disappeared[object_id]
+
+        del self.start_time[object_id]
+        del self.total_frames[object_id]
 
     def update(self, rects):
         if len(rects) == 0:
@@ -67,6 +78,7 @@ class CentroidTracker:
                 object_id = object_ids[row]
                 self.objects[object_id] = input_centroids[col]
                 self.disappeared[object_id] = 0
+                self.total_frames[object_id] += 1
                 used_rows.add(row)
                 used_cols.add(col)
 
@@ -92,4 +104,3 @@ class CentroidTracker:
         self.exited.clear()
 
         return self.objects, events
-
