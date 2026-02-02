@@ -13,7 +13,12 @@ This project implements a real-time object detection system using a webcam. It u
 - Configurable confidence threshold via CLI
 - Dynamic class filtering via CLI
 - Optional FPS limiting
-- Clean and predictable application shutdown
+- Centroid-based object tracking
+- Stable object IDs
+- Detection-to-tracking association
+- Object enter and exit event detection
+- Structured logging
+- Clean and deterministic shutdown
 
 ### Tools Used
 - Python
