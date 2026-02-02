@@ -18,6 +18,11 @@ This project implements a real-time object detection system using a webcam. It u
 - Detection-to-tracking association
 - Object enter and exit event detection
 - Structured logging
+- Per-object lifetime tracking
+- Per-object frame count tracking
+- Lifetime displayed in bounding box overlay
+- Active object count overlay
+- Lifetime and frame statistics logged on object exit
 - Clean and deterministic shutdown
 
 ### Tools Used
