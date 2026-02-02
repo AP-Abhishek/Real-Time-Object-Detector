@@ -39,16 +39,21 @@ def run_pipeline(
         rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
         objects, events = tracker.update(rects)
 
-        for ((x1, y1, x2, y2, label, conf), object_id) in zip(
-            detections, objects.keys()
-        ):
-            for oid in events["entered"]:
-                logger.info(f"Object {oid} entered frame")
+        for (x1, y1, x2, y2, label, conf) in detections:
+            cX = int((x1 + x2) / 2.0)
+            cY = int((y1 + y2) / 2.0)
 
-            for oid in events["exited"]:
-                logger.info(f"Object {oid} exited frame")
+            object_id = None
+            min_dist = float("inf")
 
-            text = f"ID {object_id}: {label} {conf:.2f}"
+            for oid, (oX, oY) in objects.items():
+                d = (cX - oX) ** 2 + (cY - oY) ** 2
+                if d < min_dist:
+                    min_dist = d
+                    object_id = oid
+
+            text = f"ID {object_id}: {label} {conf:.2f}" if object_id is not None else f"{label} {conf:.2f}"
+
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(
                 frame,
