@@ -5,7 +5,7 @@ from src.camera import read_frame, release_camera
 from src.detector import detect
 from src.tracker import CentroidTracker
 from src.config import WINDOW_NAME
-
+from src.exporter import export_exit_stats_csv
 
 def run_pipeline(
     cap,
@@ -101,4 +101,5 @@ def run_pipeline(
 
     release_camera(cap)
     cv2.destroyAllWindows()
+    export_exit_stats_csv(tracker.exit_stats)
     logger.info("Application terminated gracefully.")
