@@ -12,7 +12,8 @@ class CentroidTracker:
 
         self.start_time = {}
         self.total_frames = {}
-
+        self.exit_stats = {}
+        
         self.entered = set()
         self.exited = set()
 
@@ -27,11 +28,14 @@ class CentroidTracker:
         self.next_object_id += 1
 
     def deregister(self, object_id):
+        lifetime = time.time() - self.start_time[object_id]
+        frames = self.total_frames[object_id]
+
         self.exited.add(object_id)
+        self.exit_stats[object_id] = (lifetime, frames)
 
         del self.objects[object_id]
         del self.disappeared[object_id]
-
         del self.start_time[object_id]
         del self.total_frames[object_id]
 

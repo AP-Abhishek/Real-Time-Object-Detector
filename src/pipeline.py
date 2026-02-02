@@ -38,6 +38,12 @@ def run_pipeline(
 
         rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
         objects, events = tracker.update(rects)
+        for object_id in events["exited"]:
+            lifetime, frames = tracker.exit_stats.get(object_id, (0, 0))
+            logger.info(
+                f"Object {object_id} exited | lifetime={lifetime:.2f}s | frames={frames}"
+            )
+
 
         for object_id in events["entered"]:
             logger.info(f"Object {object_id} entered frame")
