@@ -8,7 +8,6 @@ def export_exit_stats_csv(exit_stats, output_dir="exports"):
         return
 
     os.makedirs(output_dir, exist_ok=True)
-
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     path = os.path.join(output_dir, f"run_{timestamp}.csv")
 
@@ -17,7 +16,6 @@ def export_exit_stats_csv(exit_stats, output_dir="exports"):
         writer.writerow(
             ["object_id", "lifetime_seconds", "total_frames", "exit_timestamp"]
         )
-
         for object_id, (lifetime, frames) in exit_stats.items():
             writer.writerow(
                 [
@@ -45,7 +43,6 @@ def export_run_json(
     output_dir="exports",
 ):
     os.makedirs(output_dir, exist_ok=True)
-
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     path = os.path.join(output_dir, f"run_{timestamp}.json")
 
