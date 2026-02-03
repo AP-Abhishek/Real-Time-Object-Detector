@@ -24,6 +24,11 @@ This project implements a real-time object detection system using a webcam. It u
 - Active object count overlay
 - Lifetime and frame statistics logged on object exit
 - Clean and deterministic shutdown
+- Timing metrics unified and corrected
+- Guaranteed last_seen timestamps
+- Stabilized FPS sampling
+- Run-scoped output directories
+- Deterministic summary exports
 
 ### Tools Used
 - Python
