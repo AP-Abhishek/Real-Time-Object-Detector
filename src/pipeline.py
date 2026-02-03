@@ -41,7 +41,8 @@ def run_pipeline(
         "object_count": 0,
         "total_time_seconds": 0.0,
         "max_time_seconds": 0.0,
-        "total_frames": 0
+        "total_frames": 0,
+        "avg_time_seconds": 0.0
     })
 
     while running:
@@ -52,13 +53,11 @@ def run_pipeline(
 
         ret, frame = cap.read() if is_video else read_frame(cap)
         if not ret or frame is None:
-            logger.warning("Input stream ended.")
             break
 
         total_frames += 1
 
         detections = detect(model, frame, conf, allowed_classes)
-
         rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
         objects, events = tracker.update(rects)
 
@@ -85,7 +84,6 @@ def run_pipeline(
 
             if object_id not in object_classes:
                 object_classes[object_id] = label
-                class_aggregates[label]["class_id"] = None
                 class_aggregates[label]["object_count"] += 1
 
             lifetime_sec = int(time.time() - tracker.start_time[object_id])
@@ -119,7 +117,6 @@ def run_pipeline(
         )
 
         cv2.imshow(WINDOW_NAME, frame)
-
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), 27):
             running = False
@@ -129,8 +126,10 @@ def run_pipeline(
     duration = end_ts - start_ts
 
     objects_json = []
+
     for object_id, (lifetime, frames) in tracker.exit_stats.items():
         cls = object_classes.get(object_id)
+
         objects_json.append({
             "object_id": object_id,
             "class_id": None,
@@ -147,11 +146,9 @@ def run_pipeline(
         if lifetime > agg["max_time_seconds"]:
             agg["max_time_seconds"] = lifetime
 
-    for cls, agg in class_aggregates.items():
+    for agg in class_aggregates.values():
         if agg["object_count"] > 0:
             agg["avg_time_seconds"] = agg["total_time_seconds"] / agg["object_count"]
-        else:
-            agg["avg_time_seconds"] = 0.0
 
     release_camera(cap)
     cv2.destroyAllWindows()
