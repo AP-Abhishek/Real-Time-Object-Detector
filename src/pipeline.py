@@ -1,6 +1,7 @@
 import time
 import cv2
 import uuid
+import os
 from collections import defaultdict
 
 from src.camera import read_frame, release_camera
@@ -21,11 +22,15 @@ def run_pipeline(
     tracker = CentroidTracker()
 
     run_id = str(uuid.uuid4())
+    run_ts = time.strftime("%Y%m%d_%H%M%S")
+    run_dir = os.path.join("runs", f"run_{run_ts}")
+    os.makedirs(run_dir, exist_ok=True)
+
     start_ts = time.time()
     start_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(start_ts))
 
     frame_interval = 1.0 / max_fps if max_fps and max_fps > 0 else None
-    prev_time = 0.0
+    prev_time = None
     last_frame_time = 0.0
     running = True
 
@@ -63,11 +68,11 @@ def run_pipeline(
 
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
 
-        for object_id in events["entered"]:
-            object_first_seen[object_id] = now_iso
+        for oid in events["entered"]:
+            object_first_seen[oid] = now_iso
 
-        for object_id in events["exited"]:
-            object_last_seen[object_id] = now_iso
+        for oid in events["exited"]:
+            object_last_seen[oid] = now_iso
 
         for (x1, y1, x2, y2, label, det_conf) in detections:
             cX = int((x1 + x2) / 2.0)
@@ -86,8 +91,8 @@ def run_pipeline(
                 object_classes[object_id] = label
                 class_aggregates[label]["object_count"] += 1
 
-            lifetime_sec = int(time.time() - tracker.start_time[object_id])
-            text = f"ID {object_id} | {label} {det_conf:.2f} | {lifetime_sec}s"
+            lifetime = tracker.exit_stats.get(object_id, (0, 0))[0]
+            text = f"ID {object_id} | {label} {det_conf:.2f} | {int(lifetime)}s"
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(
@@ -101,14 +106,15 @@ def run_pipeline(
             )
 
         current_time = time.time()
-        fps = 1 / (current_time - prev_time) if prev_time else 0
+        if prev_time:
+            fps = 1 / (current_time - prev_time)
+            if fps > 0:
+                fps_samples.append(fps)
         prev_time = current_time
-        if fps > 0:
-            fps_samples.append(fps)
 
         cv2.putText(
             frame,
-            f"FPS: {fps:.2f}",
+            f"FPS: {fps_samples[-1]:.2f}" if fps_samples else "FPS: --",
             (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
@@ -125,26 +131,29 @@ def run_pipeline(
     end_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(end_ts))
     duration = end_ts - start_ts
 
+    for oid in tracker.objects.keys():
+        if oid not in object_last_seen:
+            object_last_seen[oid] = end_iso
+
     objects_json = []
 
-    for object_id, (lifetime, frames) in tracker.exit_stats.items():
-        cls = object_classes.get(object_id)
+    for oid, (lifetime, frames) in tracker.exit_stats.items():
+        cls = object_classes.get(oid)
 
         objects_json.append({
-            "object_id": object_id,
+            "object_id": oid,
             "class_id": None,
             "class_name": cls,
             "frames_seen": frames,
             "time_visible_seconds": round(lifetime, 2),
-            "first_seen": object_first_seen.get(object_id),
-            "last_seen": object_last_seen.get(object_id)
+            "first_seen": object_first_seen.get(oid),
+            "last_seen": object_last_seen.get(oid)
         })
 
         agg = class_aggregates[cls]
         agg["total_time_seconds"] += lifetime
         agg["total_frames"] += frames
-        if lifetime > agg["max_time_seconds"]:
-            agg["max_time_seconds"] = lifetime
+        agg["max_time_seconds"] = max(agg["max_time_seconds"], lifetime)
 
     for agg in class_aggregates.values():
         if agg["object_count"] > 0:
@@ -153,7 +162,7 @@ def run_pipeline(
     release_camera(cap)
     cv2.destroyAllWindows()
 
-    export_exit_stats_csv(tracker.exit_stats)
+    export_exit_stats_csv(tracker.exit_stats, run_dir)
 
     export_run_json(
         run_id=run_id,
@@ -169,6 +178,7 @@ def run_pipeline(
         fps_samples=fps_samples,
         objects=objects_json,
         class_aggregates=class_aggregates,
+        output_dir=run_dir,
     )
 
     logger.info("Application terminated gracefully.")

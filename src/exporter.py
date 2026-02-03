@@ -3,13 +3,11 @@ import os
 import time
 import json
 
-def export_exit_stats_csv(exit_stats, output_dir="exports"):
+def export_exit_stats_csv(exit_stats, output_dir):
     if not exit_stats:
         return
 
-    os.makedirs(output_dir, exist_ok=True)
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    path = os.path.join(output_dir, f"run_{timestamp}.csv")
+    path = os.path.join(output_dir, "summary.csv")
 
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -40,11 +38,9 @@ def export_run_json(
     fps_samples,
     objects,
     class_aggregates,
-    output_dir="exports",
+    output_dir,
 ):
-    os.makedirs(output_dir, exist_ok=True)
-    timestamp = time.strftime("%Y%m%d_%H%M%S")
-    path = os.path.join(output_dir, f"run_{timestamp}.json")
+    path = os.path.join(output_dir, "summary.json")
 
     payload = {
         "run_metadata": {
