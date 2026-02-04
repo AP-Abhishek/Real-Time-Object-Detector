@@ -9,7 +9,11 @@ def main():
 
     model_path = cfg.get("model", "path")
     conf = cfg.get("model", "conf")
-    allowed_classes = cfg.get("model", "allowed_classes")
+    allowed_classes = cfg.get("runtime", "allowed_classes")
+    if allowed_classes:
+        allowed_classes = set(map(int, allowed_classes))
+    else:
+        allowed_classes = None
 
     source = cfg.get("input", "source")
     is_video = cfg.get("input", "is_video")
@@ -19,6 +23,8 @@ def main():
     cap = cv2.VideoCapture(source)
     window_name = cfg.get("runtime", "window_name")
     output_dir = cfg.get("runtime", "output_dir")
+    if not output_dir:
+        output_dir = "exports"
 
     run_pipeline(
         cap=cap,
