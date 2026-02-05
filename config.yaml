@@ -1,17 +1,10 @@
 model:
   path: models/yolov8n.pt
-  device: auto
-  conf: 0.25
-  allowed_classes: []
-
-input:
-  source: 0
-  is_video: false
-  max_fps: null
-
-output:
-  export_dir: exports
-  enable_export: true
+  device: cpu
 
 runtime:
-  window_name: Object Detection
+  mode: live
+  confidence: 0.5
+  camera_index: 0
+  window_name: Detection
+  output_dir: runs/latest
