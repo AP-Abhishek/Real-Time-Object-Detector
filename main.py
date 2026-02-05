@@ -6,14 +6,17 @@ from src.camera import open_camera, open_video
 def main():
     cfg = load_config()
 
-    mode = cfg.get("runtime", "mode") or "live"
-    conf = cfg.get("runtime", "confidence")
-    allowed_classes = cfg.get("runtime", "allowed_classes")
-    max_fps = cfg.get("runtime", "max_fps")
-    window_name = cfg.get("runtime", "window_name") or "Detection"
-    output_dir = cfg.get("runtime", "output_dir") or "runs/latest"
+    runtime = cfg.get("runtime", {})
+    model_cfg = cfg.get("model", {})
 
-    if allowed_classes:
+    mode = runtime.get("mode", "live")
+    conf = runtime.get("confidence", 0.5)
+    max_fps = runtime.get("max_fps")
+    window_name = runtime.get("window_name", "Detection")
+    output_dir = runtime.get("output_dir") or "runs/latest"
+
+    allowed_classes = runtime.get("allowed_classes")
+    if isinstance(allowed_classes, (list, tuple)):
         allowed_classes = set(map(int, allowed_classes))
     else:
         allowed_classes = None
@@ -22,11 +25,12 @@ def main():
 
     is_video = mode == "video"
     headless = mode in ("headless", "benchmark")
+    benchmark = mode == "benchmark"
 
     if mode == "video":
-        cap = open_video(cfg.get("runtime", "video_path"))
+        cap = open_video(runtime.get("video_path"))
     else:
-        cap = open_camera(cfg.get("runtime", "camera_index"))
+        cap = open_camera(runtime.get("camera_index", 0))
 
     run_pipeline(
         cap=cap,
@@ -39,7 +43,7 @@ def main():
         max_fps=max_fps,
         is_video=is_video,
         headless=headless,
-        benchmark=(mode == "benchmark"),
+        benchmark=benchmark,
     )
 
 if __name__ == "__main__":

@@ -43,9 +43,9 @@ def run_pipeline(
         objects, _ = tracker.update(rects)
 
         if not headless:
-            for (x1, y1, x2, y2, label, conf) in detections:
-                cX = int((x1 + x2) / 2.0)
-                cY = int((y1 + y2) / 2.0)
+            for (x1, y1, x2, y2, label, score) in detections:
+                cX = int((x1 + x2) / 2)
+                cY = int((y1 + y2) / 2)
 
                 object_id = None
                 min_dist = float("inf")
@@ -55,33 +55,19 @@ def run_pipeline(
                         min_dist = d
                         object_id = oid
 
-                lifetime_sec = int(time.time() - tracker.start_time[object_id])
-                text = f"ID {object_id} | {label} {conf:.2f} | {lifetime_sec}s"
+                lifetime = int(time.time() - tracker.start_time.get(object_id, time.time()))
+                text = f"ID {object_id} | {label} {score:.2f} | {lifetime}s"
 
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(
-                    frame,
-                    text,
-                    (x1, max(y1 - 10, 0)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 0),
-                    2,
-                )
+                cv2.putText(frame, text, (x1, max(y1 - 10, 0)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
             current_time = time.time()
             fps = 1 / (current_time - prev_time) if prev_time else 0
             prev_time = current_time
 
-            cv2.putText(
-                frame,
-                f"FPS: {fps:.2f}",
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (0, 0, 255),
-                2,
-            )
+            cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
             cv2.imshow(window_name, frame)
             key = cv2.waitKey(1) & 0xFF

@@ -1,8 +1,10 @@
 from ultralytics import YOLO
 
 def load_model(cfg):
-    model_path = cfg["model"]["path"]
-    device = cfg["model"].get("device")
+    model_cfg = cfg.get("model", {})
+    model_path = model_cfg["path"]
+    device = model_cfg.get("device")
+    model = YOLO(model_path)
     if device:
-        return YOLO(model_path).to(device)
-    return YOLO(model_path)
+        model.to(device)
+    return model
