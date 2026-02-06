@@ -11,3 +11,8 @@ dependencies = [
     "scipy>=1.17.0",
     "ultralytics>=8.4.8",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
