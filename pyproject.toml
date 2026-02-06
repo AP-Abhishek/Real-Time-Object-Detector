@@ -1,6 +1,6 @@
 [project]
 name = "real-time-object-detection"
-version = "0.7.0"
+version = "1.0.0"
 description = "A real-time computer vision project that uses a webcam and the YOLOv8 model to detect and label objects as they appear on screen, drawing bounding boxes around them using OpenCV."
 readme = "README.md"
 requires-python = ">=3.11"
