@@ -23,34 +23,49 @@ runtime:
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(cfg_content)
             f.flush()
-            
-            cfg = load_config(f.name)
+            temp_path = f.name
+        
+        try:
+            cfg = load_config(temp_path)
             assert cfg["model"]["device"] == "cpu"
             assert cfg["runtime"]["mode"] == "live"
-            
-            os.unlink(f.name)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
     
     def test_invalid_yaml(self):
         cfg_content = "invalid: yaml: content: ]["
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(cfg_content)
             f.flush()
-            
+            temp_path = f.name
+        
+        try:
             with pytest.raises(ValidationError):
-                load_config(f.name)
-            
-            os.unlink(f.name)
+                load_config(temp_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
     
     def test_empty_config(self):
         cfg_content = ""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(cfg_content)
             f.flush()
-            
-            cfg = load_config(f.name)
+            temp_path = f.name
+        
+        try:
+            cfg = load_config(temp_path)
             assert isinstance(cfg, dict)
-            
-            os.unlink(f.name)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
     
     def test_invalid_config_values(self):
         cfg_content = """
@@ -62,8 +77,13 @@ runtime:
         with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
             f.write(cfg_content)
             f.flush()
-            
+            temp_path = f.name
+        
+        try:
             with pytest.raises(ValidationError):
-                load_config(f.name)
-            
-            os.unlink(f.name)
+                load_config(temp_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except:
+                pass

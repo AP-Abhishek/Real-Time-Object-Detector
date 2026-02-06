@@ -1,5 +1,5 @@
 import cv2
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any
 from src.validation import ValidationError, validate_video_path
 
 def open_camera(index: int = 0) -> cv2.VideoCapture:
@@ -31,7 +31,7 @@ def open_video(path: str) -> cv2.VideoCapture:
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     return cap
 
-def read_frame(cap: cv2.VideoCapture) -> Tuple[bool, Optional]:
+def read_frame(cap: cv2.VideoCapture) -> Tuple[bool, Optional[Any]]:
     try:
         ret, frame = cap.read()
         return ret, frame
