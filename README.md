@@ -43,9 +43,15 @@ real-time-object-detector/
 ├── src/
 │   ├── __init__.py
 │   ├── camera.py
+│   ├── config_loader.py
 │   ├── config.py
 │   ├── detector.py
-│   └── logger.py
+│   ├── exporter.py
+│   ├── logger.py
+│   ├── model.py
+│   ├── pipeline.py
+│   ├── runtime_tracker.py
+│   └── tracker.py
 │
 ├── models/
 │   └── yolov8n.pt
