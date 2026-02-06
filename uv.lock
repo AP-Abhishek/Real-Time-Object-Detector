@@ -981,6 +981,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "numpy" },
     { name = "opencv-python" },
+    { name = "pyyaml" },
+    { name = "scipy" },
     { name = "ultralytics" },
 ]
 
@@ -988,6 +990,8 @@ dependencies = [
 requires-dist = [
     { name = "numpy", specifier = ">=2.4.1" },
     { name = "opencv-python", specifier = ">=4.13.0.90" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "scipy", specifier = ">=1.17.0" },
     { name = "ultralytics", specifier = ">=8.4.8" },
 ]
 
