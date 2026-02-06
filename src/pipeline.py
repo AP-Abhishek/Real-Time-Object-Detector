@@ -1,6 +1,8 @@
 import time
 import cv2
+import logging
 from pathlib import Path
+from typing import Optional, Set
 
 from src.camera import read_frame, release_camera
 from src.detector import detect
@@ -10,18 +12,18 @@ from src.logger import get_logger
 from src.validation import ValidationError
 
 def run_pipeline(
-    cap,
+    cap: cv2.VideoCapture,
     model,
-    logger,
-    conf,
-    allowed_classes,
-    window_name,
-    output_dir,
-    max_fps=None,
-    is_video=False,
-    headless=False,
-    benchmark=False,
-):
+    logger: Optional[logging.Logger],
+    conf: float,
+    allowed_classes: Optional[Set],
+    window_name: str,
+    output_dir: str,
+    max_fps: Optional[float] = None,
+    is_video: bool = False,
+    headless: bool = False,
+    benchmark: bool = False,
+) -> None:
     if logger is None:
         logger = get_logger()
     

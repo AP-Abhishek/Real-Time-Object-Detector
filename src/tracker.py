@@ -1,10 +1,11 @@
 import numpy as np
 import time
 from collections import OrderedDict
+from typing import List, Tuple, Dict, Any
 from scipy.spatial import distance as dist
 
 class CentroidTracker:
-    def __init__(self, max_disappeared=30):
+    def __init__(self, max_disappeared: int = 30) -> None:
         self.next_object_id = 0
         self.objects = OrderedDict()
         self.disappeared = OrderedDict()
@@ -17,7 +18,7 @@ class CentroidTracker:
         self.entered = set()
         self.exited = set()
 
-    def register(self, centroid):
+    def register(self, centroid: np.ndarray) -> None:
         self.objects[self.next_object_id] = centroid
         self.disappeared[self.next_object_id] = 0
 
@@ -27,7 +28,7 @@ class CentroidTracker:
         self.entered.add(self.next_object_id)
         self.next_object_id += 1
 
-    def deregister(self, object_id):
+    def deregister(self, object_id: int) -> None:
         lifetime = time.time() - self.start_time[object_id]
         frames = self.total_frames[object_id]
 
@@ -39,7 +40,7 @@ class CentroidTracker:
         del self.start_time[object_id]
         del self.total_frames[object_id]
 
-    def update(self, rects):
+    def update(self, rects: List[Tuple[int, int, int, int]]) -> Tuple[OrderedDict, Dict[str, Any]]:
         if len(rects) == 0:
             for object_id in list(self.disappeared.keys()):
                 self.disappeared[object_id] += 1

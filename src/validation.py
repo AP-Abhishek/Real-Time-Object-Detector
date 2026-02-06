@@ -1,9 +1,10 @@
 from pathlib import Path
+from typing import Dict, Any, Optional, Set
 
 class ValidationError(Exception):
     pass
 
-def validate_config(config):
+def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(config, dict):
         raise ValidationError("Config must be dict")
     
@@ -57,7 +58,7 @@ def validate_config(config):
     
     return config
 
-def validate_model_path(path):
+def validate_model_path(path: str) -> Path:
     p = Path(path)
     if not p.exists():
         raise ValidationError(f"Model not found: {path}")
@@ -65,7 +66,7 @@ def validate_model_path(path):
         raise ValidationError(f"Model path not a file: {path}")
     return p
 
-def validate_video_path(path):
+def validate_video_path(path: str) -> Path:
     p = Path(path)
     if not p.exists():
         raise ValidationError(f"Video not found: {path}")
@@ -76,7 +77,7 @@ def validate_video_path(path):
         raise ValidationError(f"Unsupported video format: {p.suffix}")
     return p
 
-def validate_frame(frame):
+def validate_frame(frame) -> bool:
     if frame is None:
         raise ValidationError("Frame is None")
     if len(frame.shape) != 3:

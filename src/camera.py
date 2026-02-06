@@ -1,7 +1,8 @@
 import cv2
+from typing import Tuple, Optional
 from src.validation import ValidationError, validate_video_path
 
-def open_camera(index=0):
+def open_camera(index: int = 0) -> cv2.VideoCapture:
     if not isinstance(index, int) or index < 0:
         raise ValidationError(f"Camera index must be non-negative int")
     
@@ -16,7 +17,7 @@ def open_camera(index=0):
     
     return cap
 
-def open_video(path):
+def open_video(path: str) -> cv2.VideoCapture:
     validate_video_path(path)
     cap = cv2.VideoCapture(path)
     if not cap.isOpened():
@@ -30,14 +31,14 @@ def open_video(path):
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
     return cap
 
-def read_frame(cap):
+def read_frame(cap: cv2.VideoCapture) -> Tuple[bool, Optional]:
     try:
         ret, frame = cap.read()
         return ret, frame
     except Exception as e:
         raise RuntimeError(f"Error reading frame: {e}")
 
-def release_camera(cap):
+def release_camera(cap: cv2.VideoCapture) -> None:
     if cap is not None:
         try:
             cap.release()

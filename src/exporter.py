@@ -3,8 +3,9 @@ import os
 import time
 import json
 from pathlib import Path
+from typing import Dict, Any, Tuple, List
 
-def export_exit_stats_csv(exit_stats, output_dir):
+def export_exit_stats_csv(exit_stats: Dict[int, Tuple[float, int]], output_dir: str) -> None:
     if not exit_stats:
         return
 
@@ -30,21 +31,21 @@ def export_exit_stats_csv(exit_stats, output_dir):
         print(f"Failed to export stats: {e}")
 
 def export_run_json(
-    run_id,
-    start_time,
-    end_time,
-    duration_seconds,
+    run_id: str,
+    start_time: str,
+    end_time: str,
+    duration_seconds: float,
     model,
-    device,
-    confidence_threshold,
-    input_type,
-    resolution,
-    total_frames,
-    fps_samples,
-    objects,
-    class_aggregates,
-    output_dir,
-):
+    device: str,
+    confidence_threshold: float,
+    input_type: str,
+    resolution: Tuple[int, int],
+    total_frames: int,
+    fps_samples: List[float],
+    objects: Dict,
+    class_aggregates: Dict,
+    output_dir: str,
+) -> None:
     try:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         path = os.path.join(output_dir, "summary.json")

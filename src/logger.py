@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
-def setup_logger(log_dir=None, log_file=None):
+def setup_logger(log_dir: Optional[str] = None, log_file: Optional[str] = None) -> logging.Logger:
     logger = logging.getLogger("rtod")
     
     if logger.handlers:
@@ -25,5 +26,5 @@ def setup_logger(log_dir=None, log_file=None):
     
     return logger
 
-def get_logger():
+def get_logger() -> logging.Logger:
     return logging.getLogger("rtod")
