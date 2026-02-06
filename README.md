@@ -5,61 +5,160 @@ This project implements a real-time object detection system using a webcam. It u
 ### Features
 
 - Real-time object detection using YOLOv8
-- Webcam input support
-- Video file input support
-- Bounding boxes and class labels rendered in real time
-- Confidence score displayed per detection
+- Webcam and video file input support
+- Bounding boxes, class labels, and confidence scores in real-time
 - Real-time FPS display
-- Configurable confidence threshold via CLI
-- Dynamic class filtering via CLI
+- Configurable confidence threshold via config
+- Dynamic class filtering
 - Optional FPS limiting
-- Centroid-based object tracking
-- Stable object IDs
-- Detection-to-tracking association
-- Object enter and exit event detection
-- Structured logging
-- Per-object lifetime tracking
-- Per-object frame count tracking
-- Lifetime displayed in bounding box overlay
-- Active object count overlay
-- Lifetime and frame statistics logged on object exit
+- Centroid-based object tracking with stable IDs
+- Object enter/exit event tracking
+- Structured logging to console and file
+- Per-object lifetime and frame count tracking
+- CSV/JSON export of detection statistics
+- Comprehensive error handling and validation
+- Type hints on all functions
 - Clean and deterministic shutdown
-- Timing metrics unified and corrected
-- Guaranteed last_seen timestamps
-- Stabilized FPS sampling
 - Run-scoped output directories
-- Deterministic summary exports
 
 ### Tools Used
-- Python
+- Python 3.11+
 - OpenCV
 - Ultralytics YOLOv8
+- NumPy
+- SciPy
+- PyYAML
 - uv (Python package manager)
 
-### Folder Structure
+### Installation
+
+#### Prerequisites
+- Python 3.11 or higher
+- pip or uv package manager
+- Webcam (for live mode)
+
+#### Quick Setup
+
+```bash
+git clone <repository-url>
+cd real-time-object-detection
+
+uv venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+uv pip install -r requirements.txt
 ```
-real-time-object-detector/
+
+### Quick Start
+
+```bash
+python main.py
+```
+
+Press 'q' or ESC to exit.
+
+### Configuration
+
+Edit `config.yaml`:
+
+```yaml
+model:
+  path: models/yolov8n.pt
+  device: cpu
+
+runtime:
+  mode: live                    # live, video, headless, benchmark
+  confidence: 0.5
+  camera_index: 0
+  output_dir: runs/latest
+  max_fps: null                 # Unlimited
+  video_path: null
+  allowed_classes: null
+```
+
+### Usage Modes
+
+**Live**: Default (webcam)
+**Video**: Set `mode: video` and `video_path: path/to/video.mp4`
+**Headless**: Set `mode: headless` (no display)
+**Benchmark**: Set `mode: benchmark` (performance metrics)
+
+### Folder Structure
+
+```
+real-time-object-detection/
 │
 ├── src/
 │   ├── __init__.py
-│   ├── camera.py
-│   ├── config_loader.py
-│   ├── config.py
-│   ├── detector.py
-│   ├── exporter.py
-│   ├── logger.py
-│   ├── model.py
-│   ├── pipeline.py
-│   ├── runtime_tracker.py
-│   └── tracker.py
+│   ├── camera.py              # Camera/video input
+│   ├── config_loader.py       # Config loading
+│   ├── config.py              # Config class (legacy)
+│   ├── detector.py            # YOLOv8 inference
+│   ├── exporter.py            # Results export
+│   ├── logger.py              # Logging
+│   ├── model.py               # Model loading
+│   ├── pipeline.py            # Main pipeline
+│   ├── runtime_tracker.py     # Runtime tracking
+│   ├── tracker.py             # Object tracking
+│   ├── validation.py          # Input validation
+│   └── __pycache__/
 │
 ├── models/
 │   └── yolov8n.pt
 │
-├── requirements.txt
-├── README.md
+├── exports/
+├── runs/
+├── config.yaml
 ├── main.py
-├── .python-version
+├── requirements.txt
 ├── pyproject.toml
-└── .gitignore
+├── .python-version
+├── .gitignore
+└── README.md
 ```
+
+### Output
+
+Results saved to `output_dir`:
+- `summary.csv` - Object stats
+- `summary.json` - Run metadata
+- Logs - Execution details
+
+### Error Handling
+
+Gracefully handles:
+- Missing camera/video
+- Invalid config
+- Model load failures
+- Frame errors
+- Resource cleanup
+
+### Performance Tips
+
+- GPU: Set `device: cuda`
+- Faster: Use `yolov8n.pt`
+- Lower load: Set `max_fps: 15`
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Camera won't open | Check permissions, try different index |
+| Slow | Use nano model or enable GPU |
+| Model not found | Ensure `models/yolov8n.pt` exists |
+| Config errors | Validate YAML syntax |
+
+### Development
+
+Add features:
+1. Implement in module
+2. Add type hints
+3. Add validation
+4. Add logging
+5. Test
+
+### References
+
+- YOLOv8: https://docs.ultralytics.com/
+- OpenCV: https://opencv.org/
+- PyTorch: https://pytorch.org/
