@@ -4,22 +4,20 @@ This project implements a real-time object detection system using a webcam. It u
 
 ### Features
 
-- Real-time object detection using YOLOv8
-- Webcam and video file input support
-- Bounding boxes, class labels, and confidence scores in real-time
-- Real-time FPS display
-- Configurable confidence threshold via config
-- Dynamic class filtering
-- Optional FPS limiting
-- Centroid-based object tracking with stable IDs
-- Object enter/exit event tracking
-- Structured logging to console and file
-- Per-object lifetime and frame count tracking
-- CSV/JSON export of detection statistics
-- Comprehensive error handling and validation
-- Type hints on all functions
-- Clean and deterministic shutdown
-- Run-scoped output directories
+- Real-time object detection (YOLOv8 neural network)
+- Webcam and video file input
+- Live FPS tracking and display
+- Stable object tracking with IDs (centroid-based)
+- Per-object lifecycle tracking (lifetime, frame count)
+- CSV and JSON export of detection results
+- 4 operating modes: live, video, headless, benchmark
+- GPU support with automatic CPU fallback
+- Configurable confidence threshold and class filtering
+- FPS limiting for resource control
+- Structured logging (console and file)
+- Full error handling and input validation
+- Type hints throughout codebase
+- CLI arguments for runtime configuration
 
 ### Tools Used
 - Python 3.11+
