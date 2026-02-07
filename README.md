@@ -40,13 +40,13 @@ This project implements a real-time object detection system using a webcam. It u
 #### Quick Setup
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/AP-Abhishek/Real-Time-Object-Detector.git
 cd real-time-object-detection
 
 uv venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-uv pip install -r requirements.txt
+uv add -r requirements.txt
 ```
 
 ### Quick Start
