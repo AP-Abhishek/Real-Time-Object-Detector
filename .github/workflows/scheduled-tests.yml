@@ -2,7 +2,7 @@ name: Scheduled Tests
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday midnight
+    - cron: '0 0 * * 0'
 
 jobs:
   test-matrix:
@@ -13,12 +13,13 @@ jobs:
         python-version: ['3.11', '3.12']
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     
     - name: Install dependencies
       run: |
@@ -26,22 +27,19 @@ jobs:
         pip install -r requirements.txt
     
     - name: Verify setup
-      run: |
-        python verify_setup.py
+      run: python verify_setup.py
     
     - name: Run tests
-      run: |
-        pytest tests/ -v
+      run: pytest tests/ -v
       continue-on-error: true
 
   dependency-check:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
