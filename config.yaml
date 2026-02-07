@@ -7,4 +7,4 @@ runtime:
   confidence: 0.5
   camera_index: 0
   window_name: Detection
-  output_dir: runs/latest
+  output_dir: exports
