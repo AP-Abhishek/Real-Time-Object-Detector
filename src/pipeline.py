@@ -121,7 +121,9 @@ def run_pipeline(
             cv2.destroyAllWindows()
 
         try:
+            tracker.deregister_all()
             export_exit_stats_csv(tracker.exit_stats, output_dir)
+
             logger.info(f"Exported {len(tracker.exit_stats)} object statistics (CSV)")
             
             import uuid

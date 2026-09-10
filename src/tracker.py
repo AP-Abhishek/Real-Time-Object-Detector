@@ -59,6 +59,10 @@ class CentroidTracker:
         del self.start_time[object_id]
         del self.total_frames[object_id]
 
+    def deregister_all(self) -> None:
+        for object_id in list(self.objects.keys()):
+            self.deregister(object_id)
+
     def get_tracked_info(self) -> Dict[int, Dict[str, Any]]:
         info = {}
         for oid in self.objects:
