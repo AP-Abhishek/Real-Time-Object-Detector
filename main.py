@@ -104,10 +104,11 @@ def main() -> None:
     logger.info(f"Mode: {mode}, Confidence: {conf}, FPS: {max_fps}")
 
     allowed_classes = runtime.get("allowed_classes")
-    if isinstance(allowed_classes, (list, tuple)):
-        allowed_classes = set(map(int, allowed_classes))
+    if isinstance(allowed_classes, (list, tuple, set)):
+        allowed_classes = set(allowed_classes)
     else:
         allowed_classes = None
+
 
     try:
         logger.info(f"Loading model from {model_cfg.get('path')}...")

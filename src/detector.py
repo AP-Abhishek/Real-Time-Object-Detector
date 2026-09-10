@@ -42,7 +42,7 @@ def detect(model: YOLO, frame: np.ndarray, conf_threshold: float = 0.5, allowed_
         cls_id = int(box.cls[0])
         label = names.get(cls_id, f"Unknown({cls_id})")
 
-        if allowed_classes is not None and label not in allowed_classes:
+        if allowed_classes is not None and label not in allowed_classes and cls_id not in allowed_classes and str(cls_id) not in allowed_classes:
             continue
 
         conf = float(box.conf[0])
