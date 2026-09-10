@@ -5,20 +5,7 @@ from pathlib import Path
 from src.validation import ValidationError, validate_model_path, validate_frame
 from src.device_utils import validate_and_fallback
 
-def load_model(model_path: str = "models/yolov8n.pt", device: str = "cpu") -> YOLO:
-    validate_model_path(model_path)
-    
-    final_device = validate_and_fallback(device)
-    if final_device != device:
-        print(f"Falling back to {final_device} (requested {device} not available)")
-    
-    try:
-        model = YOLO(model_path)
-        model.to(final_device)
-    except Exception as e:
-        raise RuntimeError(f"Failed to load model: {e}")
-    
-    return model
+from src.model import load_model
 
 def detect(model: YOLO, frame: np.ndarray, conf_threshold: float = 0.5, allowed_classes: Optional[Set] = None) -> List[Tuple[int, int, int, int, str, float]]:
     validate_frame(frame)
