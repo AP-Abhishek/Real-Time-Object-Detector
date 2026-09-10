@@ -3,7 +3,7 @@ import time
 import uuid
 import json
 from collections import defaultdict
-from exporter import export_exit_stats_csv, export_run_json
+from src.exporter import export_exit_stats_csv, export_run_json
 
 
 VERSION = "0.7.0"
@@ -19,7 +19,7 @@ class RuntimeTracker:
         resolution,
         output_root,
     ):
-        self.run_id = str(uuid.uuid4())
+        self.run_id = str(uuid.uuid4())[:8]
         self.version = VERSION
 
         self.model = model
@@ -28,7 +28,7 @@ class RuntimeTracker:
         self.input_type = input_type
         self.resolution = resolution
 
-        self.run_dir = os.path.join(output_root, self.run_id)
+        self.run_dir = output_root
         os.makedirs(self.run_dir, exist_ok=True)
 
         self.start_time = time.time()
@@ -99,6 +99,10 @@ class RuntimeTracker:
 
         del self.object_start[object_id]
         del self.object_frames[object_id]
+
+    def unregister_all(self):
+        for object_id in list(self.object_start.keys()):
+            self.unregister_object(object_id)
 
     def _finalize_class_aggregates(self):
         for data in self.class_aggregates.values():

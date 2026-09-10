@@ -7,7 +7,7 @@ from typing import Optional, Set
 from src.camera import read_frame, release_camera
 from src.detector import detect
 from src.tracker import CentroidTracker
-from src.exporter import export_exit_stats_csv, export_run_json
+from src.runtime_tracker import RuntimeTracker
 from src.logger import get_logger
 from src.validation import ValidationError
 
@@ -32,14 +32,15 @@ def run_pipeline(
     
     tracker = CentroidTracker()
 
+    device_name = "cuda" if hasattr(model, "device") and "cuda" in str(model.device) else ("mps" if hasattr(model, "device") and "mps" in str(model.device) else "cpu")
+    runtime_tracker = None
+
     frame_interval = 1.0 / max_fps if max_fps and max_fps > 0 else None
     prev_time = 0.0
     last_frame_time = 0.0
     frames = 0
     fps_samples = []
     resolution = None
-    objects_dict = {}
-    class_aggregates = {}
     start_time = time.time()
     running = True
 
@@ -60,16 +61,39 @@ def run_pipeline(
             if resolution is None and frame is not None:
                 resolution = (frame.shape[1], frame.shape[0])
 
+            if runtime_tracker is None:
+                runtime_tracker = RuntimeTracker(
+                    model=model,
+                    device=device_name,
+                    confidence_threshold=conf,
+                    input_type="video" if is_video else "camera",
+                    resolution=resolution or (640, 480),
+                    output_root=output_dir,
+                )
+
             try:
                 detections = detect(model, frame, conf, allowed_classes)
             except (ValidationError, RuntimeError) as e:
                 logger.warning(f"Detection error on frame {frames}: {e}")
                 continue
 
-            for x1, y1, x2, y2, label, score in detections:
-                class_aggregates[label] = class_aggregates.get(label, 0) + 1
+            _, events = tracker.update(detections)
 
-            tracker.update(detections)
+            for oid in events.get("entered", []):
+                runtime_tracker.register_object(oid, tracker.labels.get(oid, "object"))
+
+            for oid in tracker.get_tracked_info():
+                runtime_tracker.update_object(oid)
+
+            for oid in events.get("exited", []):
+                runtime_tracker.unregister_object(oid)
+
+            current_time = time.time()
+            fps = 1 / (current_time - prev_time) if prev_time else 0.0
+            prev_time = current_time
+            if fps > 0:
+                fps_samples.append(fps)
+                runtime_tracker.tick_frame(fps)
 
             if not headless:
                 try:
@@ -91,13 +115,6 @@ def run_pipeline(
                             (0, 255, 0),
                             2,
                         )
-
-
-                    current_time = time.time()
-                    fps = 1 / (current_time - prev_time) if prev_time else 0
-                    prev_time = current_time
-                    if fps > 0:
-                        fps_samples.append(fps)
 
                     cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -122,32 +139,10 @@ def run_pipeline(
 
         try:
             tracker.deregister_all()
-            export_exit_stats_csv(tracker.exit_stats, output_dir)
-
-            logger.info(f"Exported {len(tracker.exit_stats)} object statistics (CSV)")
-            
-            import uuid
-            start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
-            end_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
-            run_id = str(uuid.uuid4())[:8]
-            
-            export_run_json(
-                run_id=run_id,
-                start_time=start_time_str,
-                end_time=end_time_str,
-                duration_seconds=end_time - start_time,
-                model=model,
-                device="cuda" if hasattr(model, "device") and "cuda" in str(model.device) else "cpu",
-                confidence_threshold=conf,
-                input_type="video" if is_video else "camera",
-                resolution=resolution or (640, 480),
-                total_frames=frames,
-                fps_samples=fps_samples,
-                objects=objects_dict,
-                class_aggregates=class_aggregates,
-                output_dir=output_dir,
-            )
-            logger.info(f"Exported run metadata (JSON) - Run ID: {run_id}")
+            if runtime_tracker:
+                runtime_tracker.unregister_all()
+                runtime_tracker.finalize()
+                logger.info(f"Exported run metadata, index, and summary statistics to {output_dir}")
         except Exception as e:
             logger.error(f"Export failed: {e}")
 
@@ -155,5 +150,6 @@ def run_pipeline(
             duration = end_time - start_time
             fps = frames / duration if duration > 0 else 0
             logger.info(f"Benchmark - Frames: {frames}, Duration: {duration:.2f}s, Avg FPS: {fps:.2f}")
+
 
 
