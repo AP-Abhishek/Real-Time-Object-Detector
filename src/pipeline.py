@@ -69,29 +69,29 @@ def run_pipeline(
             for x1, y1, x2, y2, label, score in detections:
                 class_aggregates[label] = class_aggregates.get(label, 0) + 1
 
-            rects = [(x1, y1, x2, y2) for x1, y1, x2, y2, _, _ in detections]
-            objects, _ = tracker.update(rects)
+            tracker.update(detections)
 
             if not headless:
                 try:
-                    for (x1, y1, x2, y2, label, score) in detections:
-                        cX = int((x1 + x2) / 2)
-                        cY = int((y1 + y2) / 2)
-
-                        object_id = None
-                        min_dist = float("inf")
-                        for oid, (oX, oY) in objects.items():
-                            d = (cX - oX) ** 2 + (cY - oY) ** 2
-                            if d < min_dist:
-                                min_dist = d
-                                object_id = oid
-
-                        lifetime = int(time.time() - tracker.start_time.get(object_id, time.time()))
-                        text = f"ID {object_id} | {label} {score:.2f} | {lifetime}s"
+                    tracked_info = tracker.get_tracked_info()
+                    for oid, obj in tracked_info.items():
+                        x1, y1, x2, y2 = obj["box"]
+                        label = obj["label"]
+                        score = obj["score"]
+                        lifetime = int(time.time() - obj["start_time"])
+                        text = f"ID {oid} | {label} {score:.2f} | {lifetime}s"
 
                         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        cv2.putText(frame, text, (x1, max(y1 - 10, 0)),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                        cv2.putText(
+                            frame,
+                            text,
+                            (x1, max(y1 - 10, 0)),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (0, 255, 0),
+                            2,
+                        )
+
 
                     current_time = time.time()
                     fps = 1 / (current_time - prev_time) if prev_time else 0
