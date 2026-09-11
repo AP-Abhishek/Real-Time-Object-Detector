@@ -36,7 +36,8 @@ class CentroidTracker:
         self.scores[self.next_object_id] = score
 
         self.start_time[self.next_object_id] = time.time()
-        self.total_frames[self.next_object_id] = 0
+        self.total_frames[self.next_object_id] = 1
+
 
         self.entered.add(self.next_object_id)
         self.next_object_id += 1
