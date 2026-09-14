@@ -2,6 +2,7 @@ import os
 os.environ["YOLO_VERBOSE"] = "False"
 import sys
 import argparse
+from src import __version__
 from src.pipeline import run_pipeline
 from src.config_loader import load_config
 from src.model import load_model
@@ -58,7 +59,7 @@ Examples:
                         help="Benchmark mode (no display, print metrics)")
     parser.add_argument("--save-video", action="store_true",
                         help="Save annotated video output to file")
-    parser.add_argument("-v", "--version", action="version", version="1.0.0")
+    parser.add_argument("-v", "--version", action="version", version=__version__)
 
     return parser.parse_args()
 

@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 from src.exporter import export_exit_stats_csv, export_run_json
 
-VERSION = "1.0.0"
+from src import __version__ as VERSION
 
 class RuntimeTracker:
     def __init__(
