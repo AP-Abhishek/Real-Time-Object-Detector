@@ -60,11 +60,16 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 def validate_model_path(path: str) -> Path:
     p = Path(path)
-    if not p.exists():
-        raise ValidationError(f"Model not found: {path}")
-    if not p.is_file():
-        raise ValidationError(f"Model path not a file: {path}")
-    return p
+    if p.exists():
+        if not p.is_file():
+            raise ValidationError(f"Model path not a file: {path}")
+        return p
+    if p.suffix.lower() == ".pt" or path.startswith("yolov8"):
+        if p.parent:
+            p.parent.mkdir(parents=True, exist_ok=True)
+        return p
+    raise ValidationError(f"Model not found: {path}")
+
 
 def validate_video_path(path: str) -> Path:
     p = Path(path)
