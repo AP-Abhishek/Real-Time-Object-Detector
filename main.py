@@ -15,16 +15,22 @@ class CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
         super().__init__(prog, max_help_position=42, width=110)
 
 def parse_args() -> argparse.Namespace:
+    is_uv = any(k.startswith("UV") for k in os.environ)
+    is_rtod = sys.argv[0].endswith("rtod") or sys.argv[0].endswith("rtod.exe")
+    if is_uv:
+        cmd = "uv run rtod" if is_rtod else "uv run main.py"
+    else:
+        cmd = "rtod" if is_rtod else "python main.py"
     parser = argparse.ArgumentParser(
         description="Real-Time Object Detection using YOLOv8",
         formatter_class=CustomHelpFormatter,
-        epilog="""
+        epilog=f"""
 Examples:
-  rtod                                    # Webcam live detection
-  rtod --video video.mp4                  # Video file detection
-  rtod --confidence 0.7                   # Higher confidence threshold
-  rtod --headless                         # No display window
-  rtod --model models/yolov8s.pt          # Small model
+  {cmd}
+  {cmd} --video video.mp4
+  {cmd} --confidence 0.7
+  {cmd} --headless
+  {cmd} --model models/yolov8s.pt
         """
     )
 
