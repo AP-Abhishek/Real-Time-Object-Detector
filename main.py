@@ -1,3 +1,7 @@
+import os
+os.environ["YOLO_VERBOSE"] = "False"
+import sys
+import argparse
 from src.pipeline import run_pipeline
 from src.config_loader import load_config
 from src.model import load_model
@@ -5,23 +9,25 @@ from src.camera import open_camera, open_video
 from src.logger import setup_logger, get_logger
 from src.validation import ValidationError
 from src.device_utils import get_device_info, validate_and_fallback
-import sys
-import argparse
+
+class CustomHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def __init__(self, prog):
+        super().__init__(prog, max_help_position=42, width=110)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Real-Time Object Detection using YOLOv8",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=CustomHelpFormatter,
         epilog="""
 Examples:
-  python main.py                          # Webcam live detection
-  python main.py --video video.mp4        # Video file detection
-  python main.py --confidence 0.7         # Higher confidence threshold
-  python main.py --headless               # No display window
-  python main.py --model yolov8s.pt       # Smaller model
+  rtod                                    # Webcam live detection
+  rtod --video video.mp4                  # Video file detection
+  rtod --confidence 0.7                   # Higher confidence threshold
+  rtod --headless                         # No display window
+  rtod --model models/yolov8s.pt          # Small model
         """
     )
-    
+
     parser.add_argument("--config", type=str, default="config.yaml",
                         help="Config file path (default: config.yaml)")
     parser.add_argument("--mode", type=str, choices=["live", "video", "headless", "benchmark"],
@@ -46,8 +52,8 @@ Examples:
                         help="Benchmark mode (no display, print metrics)")
     parser.add_argument("--save-video", action="store_true",
                         help="Save annotated video output to file")
-    parser.add_argument("--version", action="version", version="0.7.0")
-    
+    parser.add_argument("-v", "--version", action="version", version="1.0.0")
+
     return parser.parse_args()
 
 def main() -> None:
@@ -134,11 +140,7 @@ def main() -> None:
             logger.info(f"Opening camera at index {runtime.get('camera_index', 0)}")
             cap = open_camera(runtime.get("camera_index", 0))
         logger.info("Camera/video opened successfully")
-    except (ValidationError, RuntimeError) as e:
-        logger.error(f"Failed to open camera/video: {e}")
-        sys.exit(1)
 
-    try:
         logger.info("Starting detection pipeline...")
         run_pipeline(
             cap=cap,
@@ -154,13 +156,16 @@ def main() -> None:
             benchmark=benchmark,
             save_video=save_video,
         )
-
         logger.info("Pipeline completed successfully")
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received (Ctrl+C). Exiting pipeline cleanly.")
+        sys.exit(0)
+    except (ValidationError, RuntimeError) as e:
+        logger.error(f"Failed to open camera/video: {e}")
+        sys.exit(1)
     except Exception as e:
         logger.error(f"Pipeline failed: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
     main()
-
-
