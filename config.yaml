@@ -1,6 +1,7 @@
 model:
   path: models/yolov8n.pt
   device: cpu
+  imgsz: 640
 
 runtime:
   mode: live
@@ -9,4 +10,5 @@ runtime:
   window_name: Detection
   output_dir: exports
   save_video: false
-
+  max_fps: null
+  allowed_classes: null

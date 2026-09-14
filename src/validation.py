@@ -14,12 +14,17 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
     
     model_path = model_cfg.get("path", "models/yolov8n.pt")
     device = model_cfg.get("device", "cpu").lower()
+    imgsz = model_cfg.get("imgsz", 640)
     
     if device not in ("cpu", "cuda", "mps"):
         raise ValidationError(f"device must be cpu/cuda/mps, got {device}")
     
+    if not isinstance(imgsz, int) or imgsz <= 0:
+        raise ValidationError(f"imgsz must be positive int, got {imgsz}")
+    
     model_cfg["path"] = model_path
     model_cfg["device"] = device
+    model_cfg["imgsz"] = imgsz
     
     runtime_cfg = config.get("runtime", {})
     if not isinstance(runtime_cfg, dict):
@@ -49,6 +54,10 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(save_video, bool):
         raise ValidationError(f"save_video must be bool, got {save_video}")
     
+    allowed_classes = runtime_cfg.get("allowed_classes")
+    if allowed_classes is not None and not isinstance(allowed_classes, (list, tuple, set)):
+        raise ValidationError(f"allowed_classes must be list/tuple/set or null, got {type(allowed_classes)}")
+    
     runtime_cfg.update({
         "mode": mode,
         "confidence": confidence,
@@ -56,7 +65,9 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
         "max_fps": max_fps,
         "video_path": video_path,
         "save_video": save_video,
+        "allowed_classes": allowed_classes,
     })
+
     
     config["model"] = model_cfg
     config["runtime"] = runtime_cfg
@@ -70,11 +81,12 @@ def validate_model_path(path: str) -> Path:
         if not p.is_file():
             raise ValidationError(f"Model path not a file: {path}")
         return p
-    if p.suffix.lower() == ".pt" or path.startswith("yolov8"):
-        if p.parent:
+    if p.name.startswith("yolov8") or p.name.startswith("yolo11"):
+        if p.parent and not p.parent.exists():
             p.parent.mkdir(parents=True, exist_ok=True)
         return p
     raise ValidationError(f"Model not found: {path}")
+
 
 
 def validate_video_path(path: str) -> Path:
