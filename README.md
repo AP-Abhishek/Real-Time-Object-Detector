@@ -201,3 +201,9 @@ Real-Time-Object-Detector/
 ├── verify_setup.py                    # Setup verification utility script
 └── README.md                          # Comprehensive project documentation
 ```
+
+---
+
+## Copyright
+
+© 2026 **AP-Abhishek**. All rights reserved.
