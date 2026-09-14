@@ -23,6 +23,7 @@ def run_pipeline(
     is_video: bool = False,
     headless: bool = False,
     benchmark: bool = False,
+    save_video: bool = False,
 ) -> None:
     if logger is None:
         logger = get_logger()
@@ -34,6 +35,7 @@ def run_pipeline(
 
     device_name = "cuda" if hasattr(model, "device") and "cuda" in str(model.device) else ("mps" if hasattr(model, "device") and "mps" in str(model.device) else "cpu")
     runtime_tracker = None
+    video_writer = None
 
     frame_interval = 1.0 / max_fps if max_fps and max_fps > 0 else None
     prev_time = 0.0
@@ -60,6 +62,12 @@ def run_pipeline(
 
             if resolution is None and frame is not None:
                 resolution = (frame.shape[1], frame.shape[0])
+
+            if save_video and video_writer is None and resolution is not None:
+                video_out_path = Path(output_dir) / "output.mp4"
+                fps_writer = cap.get(cv2.CAP_PROP_FPS) if cap.get(cv2.CAP_PROP_FPS) and cap.get(cv2.CAP_PROP_FPS) > 0 else 20.0
+                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+                video_writer = cv2.VideoWriter(str(video_out_path), fourcc, fps_writer, resolution)
 
             if runtime_tracker is None:
                 runtime_tracker = RuntimeTracker(
@@ -95,7 +103,7 @@ def run_pipeline(
                 fps_samples.append(fps)
                 runtime_tracker.tick_frame(fps)
 
-            if not headless:
+            if not headless or save_video:
                 try:
                     tracked_info = tracker.get_tracked_info()
                     for oid, obj in tracked_info.items():
@@ -119,11 +127,15 @@ def run_pipeline(
                     cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
-                    cv2.imshow(window_name, frame)
-                    key = cv2.waitKey(1) & 0xFF
-                    if key in (ord("q"), 27):
-                        logger.info("User quit signal received")
-                        running = False
+                    if video_writer is not None:
+                        video_writer.write(frame)
+
+                    if not headless:
+                        cv2.imshow(window_name, frame)
+                        key = cv2.waitKey(1) & 0xFF
+                        if key in (ord("q"), 27):
+                            logger.info("User quit signal received")
+                            running = False
                 except Exception as e:
                     logger.warning(f"Rendering error on frame {frames}: {e}")
                     continue
@@ -136,6 +148,10 @@ def run_pipeline(
         release_camera(cap)
         if not headless:
             cv2.destroyAllWindows()
+
+        if video_writer is not None:
+            video_writer.release()
+            logger.info(f"Saved annotated video to {output_dir}/output.mp4")
 
         try:
             tracker.deregister_all()
@@ -150,6 +166,7 @@ def run_pipeline(
             duration = end_time - start_time
             fps = frames / duration if duration > 0 else 0
             logger.info(f"Benchmark - Frames: {frames}, Duration: {duration:.2f}s, Avg FPS: {fps:.2f}")
+
 
 
 

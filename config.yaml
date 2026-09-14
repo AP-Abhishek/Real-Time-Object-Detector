@@ -8,3 +8,5 @@ runtime:
   camera_index: 0
   window_name: Detection
   output_dir: exports
+  save_video: false
+

@@ -44,6 +44,8 @@ Examples:
                         help="No display window (headless mode)")
     parser.add_argument("--benchmark", action="store_true",
                         help="Benchmark mode (no display, print metrics)")
+    parser.add_argument("--save-video", action="store_true",
+                        help="Save annotated video output to file")
     parser.add_argument("--version", action="version", version="0.7.0")
     
     return parser.parse_args()
@@ -90,6 +92,8 @@ def main() -> None:
         runtime["mode"] = "headless"
     if args.benchmark:
         runtime["mode"] = "benchmark"
+    if args.save_video:
+        runtime["save_video"] = True
     if args.model:
         model_cfg["path"] = args.model
     if args.device:
@@ -100,6 +104,7 @@ def main() -> None:
     max_fps = runtime.get("max_fps")
     window_name = runtime.get("window_name", "Detection")
     output_dir = runtime.get("output_dir") or "runs/latest"
+    save_video = runtime.get("save_video", False)
 
     logger.info(f"Mode: {mode}, Confidence: {conf}, FPS: {max_fps}")
 
@@ -108,7 +113,6 @@ def main() -> None:
         allowed_classes = set(allowed_classes)
     else:
         allowed_classes = None
-
 
     try:
         logger.info(f"Loading model from {model_cfg.get('path')}...")
@@ -148,7 +152,9 @@ def main() -> None:
             is_video=is_video,
             headless=headless,
             benchmark=benchmark,
+            save_video=save_video,
         )
+
         logger.info("Pipeline completed successfully")
     except Exception as e:
         logger.error(f"Pipeline failed: {e}")

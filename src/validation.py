@@ -45,18 +45,24 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
     if mode == "video" and not video_path:
         raise ValidationError("video_path required for video mode")
     
+    save_video = runtime_cfg.get("save_video", False)
+    if not isinstance(save_video, bool):
+        raise ValidationError(f"save_video must be bool, got {save_video}")
+    
     runtime_cfg.update({
         "mode": mode,
         "confidence": confidence,
         "camera_index": camera_index,
         "max_fps": max_fps,
         "video_path": video_path,
+        "save_video": save_video,
     })
     
     config["model"] = model_cfg
     config["runtime"] = runtime_cfg
     
     return config
+
 
 def validate_model_path(path: str) -> Path:
     p = Path(path)
