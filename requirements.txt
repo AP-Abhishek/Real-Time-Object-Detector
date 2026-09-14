@@ -1,6 +1,6 @@
-ultralytics
-opencv-python
-numpy
-scipy
-pyyaml
-pytest
+numpy>=2.4.1
+opencv-python>=4.13.0.90
+pytest>=9.0.2
+pyyaml>=6.0.3
+scipy>=1.17.0
+ultralytics>=8.4.8
