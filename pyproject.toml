@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "real-time-object-detection"
 version = "1.0.0"
@@ -13,7 +17,17 @@ dependencies = [
     "ultralytics>=8.4.8",
 ]
 
+[tool.setuptools]
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
 ]
+
+[project.scripts]
+rtod = "main:main"
+
