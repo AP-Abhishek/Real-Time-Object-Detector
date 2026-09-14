@@ -1,5 +1,7 @@
+import sys
 import time
 import cv2
+import ctypes
 import logging
 from pathlib import Path
 from typing import Optional, Set
@@ -10,6 +12,19 @@ from src.tracker import CentroidTracker
 from src.runtime_tracker import RuntimeTracker
 from src.logger import get_logger
 from src.validation import ValidationError
+
+def set_window_icon(window_name: str, icon_path: str = "assets/icon.ico") -> None:
+    if sys.platform == "win32" and Path(icon_path).exists():
+        try:
+            user32 = ctypes.windll.user32
+            hwnd = user32.FindWindowW(None, window_name)
+            if hwnd:
+                hicon = user32.LoadImageW(0, str(Path(icon_path).resolve()), 1, 0, 0, 0x00000010)
+                if hicon:
+                    user32.SendMessageW(hwnd, 0x0080, 0, hicon)
+                    user32.SendMessageW(hwnd, 0x0080, 1, hicon)
+        except Exception:
+            pass
 
 def run_pipeline(
     cap: cv2.VideoCapture,
@@ -137,6 +152,8 @@ def run_pipeline(
 
                     if not headless:
                         cv2.imshow(window_name, frame)
+                        if frames == 0:
+                            set_window_icon(window_name)
                         key = cv2.waitKey(1) & 0xFF
                         if key in (ord("q"), 27):
                             logger.info("User quit signal received")

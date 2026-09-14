@@ -114,7 +114,7 @@ def main() -> None:
     mode = runtime.get("mode", "live")
     conf = runtime.get("confidence", 0.5)
     max_fps = runtime.get("max_fps")
-    window_name = runtime.get("window_name", "Detection")
+    window_name = runtime.get("window_name", "Real-Time Object Detector")
     output_dir = runtime.get("output_dir") or "runs/latest"
     save_video = runtime.get("save_video", False)
 

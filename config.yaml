@@ -7,7 +7,7 @@ runtime:
   mode: live
   confidence: 0.5
   camera_index: 0
-  window_name: Detection
+  window_name: Real-Time Object Detector
   output_dir: exports
   save_video: false
   max_fps: null
