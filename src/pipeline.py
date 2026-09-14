@@ -46,7 +46,7 @@ def run_pipeline(
     start_time = time.time()
     running = True
 
-    logger.info(f"Starting frame processing (headless={headless}, benchmark={benchmark})")
+    logger.info(f"Starting frame processing (Press 'q' or ESC to quit) (headless={headless}, benchmark={benchmark})")
 
     try:
         while running:
@@ -126,6 +126,9 @@ def run_pipeline(
 
                     cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    cv2.putText(frame, "Press 'q' or ESC to quit", (10, frame.shape[0] - 15),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
 
                     if video_writer is not None:
                         video_writer.write(frame)
